@@ -1,0 +1,4 @@
+dataset: ShapeNetAD
+dataset_path: data/dataset/pcd
+
+max_iters: 40000

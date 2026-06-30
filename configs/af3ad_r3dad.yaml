@@ -1,0 +1,14 @@
+mode: offline
+integration: r3dad
+entrypoint: python scripts/train_r3dad_integration.py --dataset-path /path/to/data/dataset/pcd --category ashtray0
+
+dataset:
+  name: ShapeNetAD
+  root: /path/to/dataset
+
+af3ad:
+  preset_sampling: random
+  cache_generated_samples: true
+
+notes:
+  - Offline synthesis is intended for pre-generated or reusable augmented data.

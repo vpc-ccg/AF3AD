@@ -1,0 +1,15 @@
+mode: online
+integration: po3ad
+entrypoint: python scripts/train_po3ad_integration.py --dataset Real3D --dataset-base-dir /path/to/data --category airplane
+
+dataset:
+  name: Real3D
+  root: integrations/po3ad/data/Real3D
+
+af3ad:
+  preset_sampling: weighted
+  binary_anomaly_label: false
+  intact_ratio: 0.0
+
+notes:
+  - Online synthesis happens inside the PO3AD data-loading pipeline.

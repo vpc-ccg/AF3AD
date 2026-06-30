@@ -1,0 +1,31 @@
+python main.py \
+  --dataset Real3D --dataset_base_dir data/Real3D --category airplane --save_freq 500 \
+  --optimizer AdamW --logpath "./log/airplane/" --gpu_id 0 \
+  --epochs 2501 \
+  --lr 0.0008 --lr_D 0.0008 \
+  --lr_schedule cosine_warmup \
+  --max_lr 0.0008 --min_lr 1e-06 \
+  --first_cycle_steps 500 --cycle_mult 1.0 \
+  --warmup_steps 25 \
+  --gamma 0.2 \
+  --data_repeat 100 \
+  --batch_size 32 \
+  --smart_anomaly \
+  --num_workers 16 \
+  --cache_dataset --cache_clear_freq 10 --gc_collect_freq 5 \
+  --metric_eval_freq 500 --validation_eval_freq 500 \
+  --downsample_mode voxel_fps \
+  --downsample_target_points 15000 \
+  --downsample_random_seed 42 \
+  --downsample_recompute_normals \
+  --voxel_size 0.03 \
+  --R_alpha 2 --R_beta 2 --R_low_bound 0.03 --R_up_bound 0.25 \
+  --B_alpha 2 --B_beta 2 --B_low_bound 0.06 --B_up_bound 0.125 \
+  --one_sided_prob 0.5 \
+  --validation_suffixes=67,82,89,142,149,156,163,170,184,191 \
+  --intact_ratio 0.1 --train_data_type cut \
+  --no_plane_cut \
+  --offset_head_variant multi_head --offset_hidden_dim 128 \
+  --edge_cutout_enabled \
+  --mask_num 64 \
+  --sample_export_all --sample_export_annotated
