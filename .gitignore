@@ -33,3 +33,4 @@ data/Real3D/Real3D-AD-PLY-CUT+FULL
 data/AnomalyShapeNet/dataset
 log/
 AF3AD_ckpts/
+ckpts/

@@ -11,7 +11,8 @@
 <p align="center">
   <a href="https://arxiv.org/abs/2606.29181">Paper</a> |
   <a href="#basic-usage">Quickstart</a> |
-  <a href="#citation">Citation</a>
+  <a href="#citation">Citation</a> |
+  Accepted to ECCV 2026
 </p>
 
 AF3AD turns normal 3D point clouds into realistic pseudo-anomalous examples.
@@ -232,6 +233,41 @@ python scripts/train_r3dad_integration.py --dataset-path ./data/dataset/pcd --ca
 python scripts/generate_offline_anomalies.py integrations/r3dad/configs/shapenet-ad/base.yaml
 ```
 
+## Pretrained Checkpoints
+
+Pretrained AF3AD checkpoints are available on Hugging Face:
+
+https://huggingface.co/AliBalapour/AF3AD
+
+Download the checkpoints and place them under `ckpts/`. The Real3D-AD
+checkpoint bundle is expected to follow this structure:
+
+```text
+ckpts/Real3DAD/
+  airplane/
+    ckpts/airplane.pth
+    po3ad_eval_real3d.yaml
+  car/
+    ckpts/car.pth
+    po3ad_eval_real3d.yaml
+  ...
+```
+
+The released `.pth` files are discriminator-only PyTorch `state_dict`
+checkpoints. Run evaluation from the repository root after activating the
+PO3AD checkpoint-testing environment and setting `PYTHONPATH`:
+
+```bash
+export PYTHONPATH="$PWD:$PYTHONPATH"
+```
+
+Evaluate all Real3D-AD categories:
+
+```bash
+python3 scripts/evaluate_po3ad_checkpoint.py --checkpoint ckpts/Real3DAD/[category]/ckpts/[category].pth --config ckpts/Real3DAD/[category]/po3ad_eval_real3d.yaml
+```
+
+
 ## Results From The Paper
 
 The paper evaluates AF3AD on AnomalyShapeNet and Real3D-AD. For the
@@ -276,4 +312,5 @@ geometric pseudo-anomaly diversity for training anomaly detectors.
 
 ## Release TODO (Weighted)
 
-- [ ] Release weights
+- [x] Release weights for Real3D-AD
+- [ ] Release weights for AnomalyShapeNet

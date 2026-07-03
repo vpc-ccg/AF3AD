@@ -11,7 +11,7 @@ import sys
 import time
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -287,49 +287,19 @@ def sanitize_for_path(value: str) -> str:
 def load_checkpoint_state(
     checkpoint_path: Path,
     device: str,
-) -> Tuple[Dict[str, torch.Tensor], Dict[str, Any]]:
+) -> Dict[str, torch.Tensor]:
     checkpoint = torch.load(str(checkpoint_path), map_location=device)
-    metadata: Dict[str, Any] = {}
 
-    if isinstance(checkpoint, dict):
-        metadata = checkpoint_metadata(checkpoint)
-        for key in ("discriminator", "model", "state_dict"):
-            state = checkpoint.get(key)
-            if isinstance(state, dict):
-                return strip_module_prefix(state), metadata
+    if isinstance(checkpoint, dict) and all(torch.is_tensor(value) for value in checkpoint.values()):
+        return strip_module_prefix(checkpoint)
 
-        if all(torch.is_tensor(value) for value in checkpoint.values()):
-            return strip_module_prefix(checkpoint), metadata
-
+    keys = sorted(checkpoint.keys()) if isinstance(checkpoint, dict) else []
     raise ValueError(
-        "Unsupported checkpoint format. Expected a dict containing "
-        "`discriminator`, `model`, `state_dict`, or a raw state_dict."
+        "Unsupported checkpoint format. Expected a raw discriminator state_dict "
+        "where every top-level value is a tensor. Convert full training checkpoints "
+        "with `python scripts/convert_po3ad_checkpoint_to_state_dict.py <input> <output>`. "
+        f"Available top-level keys: {keys}"
     )
-
-
-def checkpoint_metadata(checkpoint: Dict[str, Any]) -> Dict[str, Any]:
-    """Keep lightweight checkpoint metadata and skip optimizer/scaler payloads."""
-
-    metadata: Dict[str, Any] = {}
-    skipped = {
-        "discriminator",
-        "model",
-        "state_dict",
-        "opt_D",
-        "optimizer",
-        "scaler_D",
-        "scheduler",
-    }
-    for key, value in checkpoint.items():
-        if key in skipped:
-            continue
-        if isinstance(value, (str, int, float, bool)) or value is None:
-            metadata[key] = value
-        elif isinstance(value, dict) and key == "metrics":
-            metadata[key] = value
-        else:
-            metadata[key] = f"<{type(value).__name__}>"
-    return metadata
 
 
 def strip_module_prefix(state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
@@ -442,7 +412,7 @@ def evaluate(args: SimpleNamespace, checkpoint_path: Path, output_dir: Path) -> 
         )
 
     model = Discriminator(args).to(args.device)
-    state_dict, checkpoint_metadata = load_checkpoint_state(checkpoint_path, args.device)
+    state_dict = load_checkpoint_state(checkpoint_path, args.device)
     missing, unexpected = model.load_state_dict(
         state_dict,
         strict=bool(getattr(args, "strict_checkpoint", True)),
@@ -530,7 +500,7 @@ def evaluate(args: SimpleNamespace, checkpoint_path: Path, output_dir: Path) -> 
         payload = {
             "metrics": metrics,
             "checkpoint": str(checkpoint_path),
-            "checkpoint_metadata": checkpoint_metadata,
+            "checkpoint_format": "raw_discriminator_state_dict",
             "config": vars(args),
         }
         with (output_dir / "metrics.json").open("w", encoding="utf-8") as handle:
