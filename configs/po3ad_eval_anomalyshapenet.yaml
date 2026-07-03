@@ -1,0 +1,45 @@
+# PO3AD-style checkpoint evaluation on AnomalyShapeNet.
+# Override dataset_base_dir, category, and model head settings to match the checkpoint.
+
+dataset:
+  name: AnomalyShapeNet
+  base_dir: data/AnomalyShapeNet/dataset
+  category: ashtray0
+
+runtime:
+  gpu_id: "0"
+  manual_seed: 42
+  num_workers: 4
+  torch_num_threads: 1
+
+model:
+  voxel_size: 0.03
+  in_channels: 3
+  out_channels: 32
+  offset_head_variant: baseline
+  offset_hidden_dim: 32
+  offset_num_layers: 3
+  offset_dropout: 0.0
+  offset_attention_reduction: 4
+
+data:
+  batch_size: 1
+  data_repeat: 1
+  mask_num: 64
+  cache_dataset: false
+  cache_test_set: false
+  validation: false
+  normal_tag: positive
+  gt_delimiter: ","
+
+evaluation:
+  metric_max_points: 0
+  max_samples:
+  strict_checkpoint: true
+  save_sample_scores: true
+  save_point_scores: false
+  write_metrics_json: true
+
+logging:
+  logpath: ./log/po3ad_eval
+  output_dir: ""

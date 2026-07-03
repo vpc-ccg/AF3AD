@@ -1292,6 +1292,8 @@ class Dataset:
         self.data_repeat = cfg.data_repeat
         self.voxel_size = cfg.voxel_size
         self.mask_num = cfg.mask_num
+        self.normal_tag = getattr(cfg, 'normal_tag', 'positive')
+        self.gt_delimiter = getattr(cfg, 'gt_delimiter', ',')
         cache_dataset = getattr(cfg, 'cache_dataset', False)
         cache_test_set = getattr(cfg, 'cache_test_set', None)
         self.cache_dataset = bool(cache_dataset)
@@ -1299,6 +1301,7 @@ class Dataset:
             cache_test_set)
 
         self.category = cfg.category
+        self.gt_mask_dir = self._default_gt_mask_dir()
         self.category_list = self._list_categories()
         assert self.category in self.category_list
 
@@ -1372,10 +1375,6 @@ class Dataset:
         else:
             self.validation_file_list = []
         self._eval_file_list = self.test_file_list
-
-        self.normal_tag = getattr(cfg, 'normal_tag', 'positive')
-        self.gt_delimiter = getattr(cfg, 'gt_delimiter', ',')
-        self.gt_mask_dir = self._default_gt_mask_dir()
 
         transform_module = self._get_transform_module()
         self.NormalizeCoord = transform_module.NormalizeCoord()
@@ -1466,10 +1465,44 @@ class Dataset:
     def _test_file_glob(self):
         return str(Path(self.global_cfg.dataset_base_dir + '/pcd') / self.category / 'test' / '*.pcd')
 
+    def _gt_file_glob(self):
+        return str(self.gt_mask_dir / '*.txt')
+
+    def _natural_sort_key(self, path_str: str):
+        key = []
+        for part in re.split(r'(\d+)', Path(path_str).name.lower()):
+            if part.isdigit():
+                key.append((1, int(part)))
+            else:
+                key.append((0, part))
+        return key
+
+    def _is_normal_eval_file(self, path_str: str) -> bool:
+        return bool(self.normal_tag and self.normal_tag in Path(path_str).name)
+
+    def _eval_file_sort_key(self, path_str: str):
+        # Keep normal positives first, then defects, with natural numeric ordering.
+        return (
+            0 if self._is_normal_eval_file(path_str) else 1,
+            self._natural_sort_key(path_str),
+        )
+
     def _build_test_file_list(self):
         test_files = glob.glob(self._test_file_glob())
-        test_files.sort()
-        return test_files
+        gt_files = glob.glob(self._gt_file_glob())
+
+        # In the public AnomalyShapeNet layout, normal samples are .pcd files in
+        # test/, while anomalous samples are stored as full point clouds plus
+        # labels in GT/*.txt. If a matching anomalous .pcd exists, keep the .pcd
+        # entry and use the GT file only for point labels.
+        test_stems = {Path(fn).stem for fn in test_files}
+        gt_only_anomaly_files = [
+            fn for fn in gt_files if Path(fn).stem not in test_stems
+        ]
+
+        eval_files = test_files + gt_only_anomaly_files
+        eval_files.sort(key=self._eval_file_sort_key)
+        return eval_files
 
     def _parse_validation_suffixes(self, suffixes_raw):
         if suffixes_raw is None:
@@ -1538,6 +1571,8 @@ class Dataset:
         if self.gt_delimiter is not None:
             kwargs['delimiter'] = self.gt_delimiter
         data = np.loadtxt(gt_path, **kwargs)
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
         return data[:, 0:3]
 
     def _load_normal_point_cloud(self, fn_path: str) -> np.ndarray:
@@ -1589,7 +1624,7 @@ class Dataset:
         return coord, vertex_normals
 
     def _load_test_point_cloud(self, fn_path: str):
-        is_normal = self.normal_tag and self.normal_tag in Path(fn_path).name
+        is_normal = self._is_normal_eval_file(fn_path)
         if is_normal:
             coord = self._load_normal_point_cloud(fn_path)
             label = 0

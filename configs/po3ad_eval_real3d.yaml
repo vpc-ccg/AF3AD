@@ -1,0 +1,64 @@
+# PO3AD-style checkpoint evaluation on Real3D-AD.
+# Override dataset_base_dir, category, voxel sizes, and model head settings to match the checkpoint.
+
+# python scripts/evaluate_po3ad_checkpoint.py  --dataset Real3D   --checkpoint ckpts/Real3DAD/_final_real3dad_v2_checkpoints/airplane/2026-01-24_16-27-46/ckpts/2026-01-24_16-27-46_epoch_e1000.pth  --config configs/po3ad_eval_real3d.yaml   --dataset-base-dir data/Real3D   --category airplane --voxel-size 0.02
+
+dataset:
+  name: Real3D
+  base_dir: data/Real3D
+  category: airplane
+
+runtime:
+  gpu_id: "0"
+  manual_seed: 42
+  num_workers: 4
+  torch_num_threads: 1
+
+model:
+  voxel_size: 0.03
+  in_channels: 3
+  out_channels: 32
+  offset_head_variant: multi_head
+  offset_hidden_dim: 128
+  offset_num_layers: 3
+  offset_dropout: 0.0
+  offset_attention_reduction: 4
+
+data:
+  batch_size: 1
+  data_repeat: 1
+  mask_num: 64
+  cache_dataset: false
+  cache_test_set: false
+  validation: false
+  train_data_type: pcd
+  normal_tag: good
+  gt_delimiter:
+
+  # Optional Real3D test-set downsampling. Keep disabled for full-resolution metrics.
+  test_downsample_enabled: false
+  test_downsample_voxel_size: 0.001
+
+  # Training-data downsampling fields are present because the Real3D dataset object
+  # initializes the training split too, even though evaluation only calls testLoader().
+  downsample_mode: none
+  downsample_ratio: 0.4
+  downsample_voxel_size:
+  downsample_voxel_size_multiplier: 2.0
+  downsample_target_points:
+  downsample_recompute_normals: true
+  downsample_random_seed: 42
+  plane_cut_enabled: false
+  edge_cutout_enabled: false
+
+evaluation:
+  metric_max_points: 0
+  max_samples:
+  strict_checkpoint: true
+  save_sample_scores: true
+  save_point_scores: false
+  write_metrics_json: true
+
+logging:
+  logpath: ./log/po3ad_eval
+  output_dir: ""

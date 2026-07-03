@@ -196,6 +196,19 @@ The detector integrations require their own training environments and heavier
 dependencies such as PyTorch, CUDA-specific packages, MinkowskiEngine, Open3D,
 FAISS, and point-cloud processing libraries.
 
+The integration modules are not installed as separate packages. From the
+repository root, make this directory importable before running the reference
+launchers:
+
+```bash
+export PYTHONPATH="$PWD:$PYTHONPATH"
+```
+
+Detailed PO3AD setup notes are in
+[integrations/README.md](integrations/README.md), including venv-based
+installation guidance for the legacy Python 3.8/PyTorch 1.9 stack and a modern
+PyTorch 2.x/CUDA 12.x checkpoint-testing stack.
+
 For PO3AD-based training, follow the original PO3AD repository:
 
 https://github.com/yjnanan/PO3AD
