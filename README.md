@@ -239,8 +239,8 @@ Pretrained AF3AD checkpoints are available on Hugging Face:
 
 https://huggingface.co/AliBalapour/AF3AD
 
-Download the checkpoints and place them under `ckpts/`. The Real3D-AD
-checkpoint bundle is expected to follow this structure:
+Download the checkpoints and place them under `ckpts/`. The checkpoint bundle is
+expected to follow this structure:
 
 ```text
 ckpts/Real3DAD/
@@ -250,6 +250,11 @@ ckpts/Real3DAD/
   car/
     ckpts/car.pth
     po3ad_eval_real3d.yaml
+  ...
+ckpts/AnomalyShapeNet/
+  ashtray0/
+    ckpts/ashtray0.pth
+    po3ad_eval_anomalyshapenet.yaml
   ...
 ```
 
@@ -267,6 +272,14 @@ Evaluate all Real3D-AD categories:
 python3 scripts/evaluate_po3ad_checkpoint.py --checkpoint ckpts/Real3DAD/[category]/ckpts/[category].pth --config ckpts/Real3DAD/[category]/po3ad_eval_real3d.yaml
 ```
 
+Evaluate AnomalyShapeNet categories:
+
+```bash
+python3 scripts/evaluate_po3ad_checkpoint.py --checkpoint ckpts/AnomalyShapeNet/[category]/ckpts/[category].pth --config ckpts/AnomalyShapeNet/[category]/po3ad_eval_anomalyshapenet.yaml
+```
+
+The current AnomalyShapeNet checkpoint release includes 30 categories; the
+remaining categories will be added later.
 
 ## Results From The Paper
 
