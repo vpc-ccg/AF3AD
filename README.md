@@ -15,6 +15,10 @@
   Accepted to ECCV 2026
 </p>
 
+
+[![Papers with Code: #2 on Anomaly-ShapeNet](https://paperswithcode.co/api/v1/papers/2606.29181/leaderboard-badge.svg?eval=46359&live=1)](https://paperswithcode.co/api/v1/papers/2606.29181/leaderboard-badge-link?eval=46359)
+
+
 AF3AD turns normal 3D point clouds into realistic pseudo-anomalous examples.
 It is built for unsupervised 3D anomaly detection, where real defective training
 samples are scarce but normal samples are available.
