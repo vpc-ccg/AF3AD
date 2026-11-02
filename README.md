@@ -327,7 +327,6 @@ geometric pseudo-anomaly diversity for training anomaly detectors.
 }
 ```
 
-## Release TODO (Weighted)
+## Acknowledgements
 
-- [x] Release weights for Real3D-AD
-- [ ] Release weights for AnomalyShapeNet
+This research was enabled in part by support provided by Calcul Québec (calculquebec.ca), the BC DRI Group and the Digital Research Alliance of Canada (alliancecan.ca), and by the Pan-Canadian AI Compute Environment (PAICE).
